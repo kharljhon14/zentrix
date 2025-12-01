@@ -19,3 +19,7 @@ func (app application) serverErrorResponse(w http.ResponseWriter, err error) {
 func (app application) notFoundResponse(w http.ResponseWriter, message string) {
 	app.errorResponse(w, http.StatusNotFound, message)
 }
+
+func (app application) badRequestResponse(w http.ResponseWriter, err error) {
+	app.errorResponse(w, http.StatusBadRequest, err)
+}

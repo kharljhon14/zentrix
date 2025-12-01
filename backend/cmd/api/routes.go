@@ -13,5 +13,8 @@ func (app *application) routes() http.Handler {
 
 	r.Get("/healthcheck", app.healthCheckHandler)
 
+	// Tenants
+	r.Post("/register", app.registerTenantHandler)
+
 	return r
 }
