@@ -1,0 +1,70 @@
+# -----------------------------------
+# Go Backend
+# -----------------------------------
+# Binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+
+# Build output
+bin/
+build/
+dist/
+tmp/
+
+# Coverage files
+*.out
+
+# Environment & config
+.env
+.env.*
+*.local
+
+# Logs
+*.log
+
+# IDEs / Editors
+.vscode/
+.idea/
+*.swp
+*.DS_Store
+
+# Go modules (optional)
+# /pkg/mod/
+
+# -----------------------------------
+# React + Vite Frontend
+# -----------------------------------
+# Node modules
+node_modules/
+
+# Build output
+dist/
+build/
+
+# Local environment files
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Vite cache
+.vite/
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Misc
+.DS_Store
+Thumbs.db
+
+# -----------------------------------
+# OS Files
+# -----------------------------------
+.DS_Store
+Thumbs.db
