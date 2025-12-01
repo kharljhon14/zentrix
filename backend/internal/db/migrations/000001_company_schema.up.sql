@@ -9,3 +9,4 @@ CREATE TABLE "companies"(
     "created_at" TIMESTAMPTZ DEFAULT now(),
     "updated_at" TIMESTAMPTZ DEFAULT now()
 );
+
