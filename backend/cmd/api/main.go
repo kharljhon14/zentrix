@@ -1,19 +1,40 @@
 package main
 
 import (
-	"net/http"
-
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
+	"flag"
+	"os"
+	"time"
 )
 
+const version = "1.0.0"
+
+type config struct {
+	port int
+	env  string
+	db   struct {
+		dsn          string
+		maxOpenConns int
+		maxIdleConns int
+		maxIdleTime  time.Duration
+	}
+}
+
+type application struct {
+	config config
+}
+
 func main() {
-	r := chi.NewRouter()
-	r.Use(middleware.Logger)
+	var cfg config
 
-	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Hello"))
-	})
+	flag.IntVar(&cfg.port, "port", 4000, "API server port")
+	flag.StringVar(&cfg.env, "env", "development", "Environment(development|production|statging)")
+	flag.StringVar(&cfg.db.dsn, "dsn", os.Getenv("DSN"), "PostgreSQL DSN")
 
-	http.ListenAndServe(":8000", r)
+	flag.Parse()
+
+	app := &application{
+		config: cfg,
+	}
+
+	app.serve()
 }
