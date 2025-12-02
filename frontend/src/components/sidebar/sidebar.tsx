@@ -4,14 +4,20 @@ import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
-  SidebarMenu
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem
 } from '@/components/ui/sidebar';
 import {
   BookUser,
   Building2,
   Calendar,
   Gauge,
+  LayoutList,
+  Logs,
   NotepadText,
+  Settings,
   ShieldUser,
   SquareKanban
 } from 'lucide-react';
@@ -36,20 +42,18 @@ const sidebarItems: SidebarItem[] = [
     name: 'Calendar',
     url: '/calendar'
   },
+
   {
-    icon: <SquareKanban size={18} />,
-    name: 'Scrumboard',
-    subItems: [
-      {
-        name: 'Project Kanban',
-        url: '/kaban'
-      },
-      {
-        name: 'Sales Pipeline',
-        url: '/sales'
-      }
-    ]
+    icon: <LayoutList />,
+    name: 'Projects',
+    url: '/kaban'
   },
+  {
+    icon: <SquareKanban />,
+    name: 'Sales Pipeline',
+    url: '/sales'
+  },
+
   {
     icon: <Building2 />,
     name: 'Companies',
@@ -66,27 +70,36 @@ const sidebarItems: SidebarItem[] = [
     url: '/quotes'
   },
   {
-    icon: <ShieldUser size={18} />,
-    name: 'Administration',
-    subItems: [
-      {
-        name: 'Settings',
-        url: '/settings'
-      },
-      {
-        name: 'Audit Log',
-        url: '/logs'
-      }
-    ]
+    icon: <Logs />,
+    name: 'Audit Log',
+    url: '/logs'
+  },
+  {
+    icon: <Settings />,
+    name: 'Settings',
+    url: '/settings'
   }
 ];
 
 export default function AppSidebar() {
   return (
     <Sidebar>
+      <SidebarHeader>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild>
+              <a
+                href="#"
+                className="p-6"
+              >
+                <span className="text-lg font-semibold">Acme Inc.</span>
+              </a>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarHeader>
       <SidebarContent className="bg-white">
         <SidebarGroup>
-          <SidebarGroupLabel>Tenant Name</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {sidebarItems.map((item) => (
