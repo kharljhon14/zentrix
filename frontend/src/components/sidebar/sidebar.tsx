@@ -1,14 +1,10 @@
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem
+  SidebarMenu
 } from '@/components/ui/sidebar';
 import {
   BookUser,
@@ -88,7 +84,7 @@ const sidebarItems: SidebarItem[] = [
 export default function AppSidebar() {
   return (
     <Sidebar>
-      <SidebarContent>
+      <SidebarContent className="bg-white">
         <SidebarGroup>
           <SidebarGroupLabel>Tenant Name</SidebarGroupLabel>
           <SidebarGroupContent>
