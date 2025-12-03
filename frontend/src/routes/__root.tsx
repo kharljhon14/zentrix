@@ -11,15 +11,7 @@ export const Route = createRootRoute({
 function RootComponent() {
   return (
     <React.Fragment>
-      <AppSidebarProvider>
-        <AppSidebar />
-        <div className="w-full">
-          <Header />
-          <main className="">
-            <Outlet />
-          </main>
-        </div>
-      </AppSidebarProvider>
+      <Outlet />
     </React.Fragment>
   );
 }
