@@ -40,3 +40,28 @@ func (t TenantModel) Insert(tenant *Tenant) error {
 
 	return nil
 }
+
+func (t TenantModel) Get(id string) (*Tenant, error) {
+	query := `
+		SELECT id, name, plan, created_at 
+		FROM tenants 
+		WHERE id = $1;
+	`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	var tenant Tenant
+
+	err := t.DB.QueryRowContext(ctx, query, id).Scan(
+		&tenant.ID,
+		&tenant.Name,
+		&tenant.Plan,
+		&tenant.CreatedAt,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return &tenant, nil
+}
