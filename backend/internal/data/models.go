@@ -1,6 +1,13 @@
 package data
 
-import "database/sql"
+import (
+	"database/sql"
+	"errors"
+)
+
+var (
+	ErrEditConflict = errors.New("edit conflict")
+)
 
 type Models struct {
 	Users  UserModel

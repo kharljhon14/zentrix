@@ -23,6 +23,7 @@ type User struct {
 	LastName  string    `json:"last_name"`
 	Email     string    `json:"email"`
 	Password  password  `json:"-"`
+	Activated bool      `json:"activated"`
 	Role      string    `json:"role"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
@@ -59,6 +60,38 @@ func (u UserModel) Insert(user *User) error {
 		switch {
 		case err.Error() == `pq: duplicate key value violates unique constraint "users_email_key"`:
 			return ErrDuplicateEmail
+		default:
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (u UserModel) Update(user *User) error {
+	query := `
+		UPDATE users
+		SET first_name = $1,
+		last_name = $2,
+		email = $3,
+		activated = $4,
+		role = $5,
+		updated_at = NOW()
+		RETURNING updated_at
+	`
+
+	args := []any{user.FirstName, user.LastName, user.Email, user.Activated, user.Role}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	err := u.DB.QueryRowContext(ctx, query, args...).Scan(&user.UpdatedAt)
+	if err != nil {
+		switch {
+		case err.Error() == `pq: duplicate key value violates unique constraint "users_email_key"`:
+			return ErrDuplicateEmail
+		case errors.Is(err, sql.ErrNoRows):
+			return sql.ErrNoRows
 		default:
 			return err
 		}

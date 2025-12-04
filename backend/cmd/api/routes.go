@@ -15,5 +15,7 @@ func (app *application) routes() http.Handler {
 
 	// User auth
 	r.Post("/register", app.registerUserHandler)
+	r.Put("/activate", app.activateUserHandler)
+
 	return r
 }
