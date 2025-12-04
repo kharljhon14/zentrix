@@ -5,6 +5,7 @@ CREATE TABLE "companies"(
     "name" VARCHAR(255) NOT NULL,
     "address" VARCHAR(255) NOT NULL,
     "email" VARCHAR(255) NOT NULL UNIQUE,
+    "image" TEXT,
     "website" VARCHAR(255),
     "created_at" TIMESTAMPTZ DEFAULT now(),
     "updated_at" TIMESTAMPTZ DEFAULT now()
