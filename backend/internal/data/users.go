@@ -15,6 +15,8 @@ var (
 	ErrDuplicateEmail = errors.New("duplicate email")
 )
 
+var AnonymousUser = &User{}
+
 type User struct {
 	ID        uuid.UUID `json:"id"`
 	FirstName string    `json:"first_name"`
@@ -127,4 +129,8 @@ func (p password) Matches(plainTextPassword string) (bool, error) {
 	}
 
 	return true, nil
+}
+
+func (u *User) IsAnonymous() bool {
+	return u == AnonymousUser
 }

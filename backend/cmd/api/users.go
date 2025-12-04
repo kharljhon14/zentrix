@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/kharljhon14/zentrix/internal/data"
 	"github.com/kharljhon14/zentrix/internal/validator"
@@ -55,9 +56,14 @@ func (app application) registerUserHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	err = app.writeJSON(w, http.StatusCreated, envelope{"user": user}, nil)
+	token, err := app.models.Tokens.New(user.ID, 3*24*time.Hour, data.ScopeActivation)
+	if err != nil {
+		app.serverErrorResponse(w, err)
+		return
+	}
+
+	err = app.writeJSON(w, http.StatusCreated, envelope{"user": user, "token": token}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, err)
 	}
-
 }
