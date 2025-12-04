@@ -17,7 +17,6 @@ var (
 
 type User struct {
 	ID        uuid.UUID `json:"id"`
-	TenantID  uuid.UUID `json:"tenant_id"`
 	FirstName string    `json:"first_name"`
 	LastName  string    `json:"last_name"`
 	Email     string    `json:"email"`
@@ -33,13 +32,12 @@ type UserModel struct {
 
 func (u UserModel) Insert(user *User) error {
 	query := `
-		INSERT INTO USERS (tenant_id, first_name, last_name, email, password_hash, role)
-		VALUES ($1, $2, $3, $4, $5, $6)
+		INSERT INTO USERS (first_name, last_name, email, password_hash, role)
+		VALUES ($1, $2, $3, $4, $5)
 		RETURNING id, created_at, updated_at
 	`
 
 	args := []any{
-		user.TenantID,
 		user.FirstName,
 		user.LastName,
 		user.Email,
@@ -85,6 +83,9 @@ func ValidateUser(v *validator.Validator, user *User) {
 
 	v.Check(user.LastName != "", "last_name", "last_name is required")
 	v.Check(len(user.LastName) <= 80, "last_name", "last_name must not exceed 80 characters")
+
+	v.Check(user.Role != "", "role", "role is required")
+	v.Check(len(user.Role) <= 60, "role", "role must not exceed 40 characters")
 
 	ValidateEmail(v, user.Email)
 

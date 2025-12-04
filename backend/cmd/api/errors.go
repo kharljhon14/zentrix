@@ -21,7 +21,7 @@ func (app application) notFoundResponse(w http.ResponseWriter, message string) {
 }
 
 func (app application) badRequestResponse(w http.ResponseWriter, err error) {
-	app.errorResponse(w, http.StatusBadRequest, err)
+	app.errorResponse(w, http.StatusBadRequest, err.Error())
 }
 
 func (app application) failedValidationResponse(w http.ResponseWriter, errors map[string]string) {

@@ -56,7 +56,7 @@ func (app application) readJSON(w http.ResponseWriter, r *http.Request, dst any)
 			}
 			return fmt.Errorf("body contains incorrect JSON type (at characted %d)", unmarshalTypeError.Offset)
 
-		case strings.HasPrefix(err.Error(), "json: unknown field"):
+		case strings.HasPrefix(err.Error(), "json: unknown field "):
 			fieldName := strings.TrimPrefix(err.Error(), "json: unknown field ")
 			return fmt.Errorf("body contains unknown key %s", fieldName)
 
