@@ -1,0 +1,1 @@
+ALTER TABLE "companies" ADD FOREIGN KEY ("sales_owner") REFERENCES "users" ("id");

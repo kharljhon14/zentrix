@@ -4,7 +4,7 @@ CREATE TABLE "companies"(
     "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     "name" VARCHAR(255) NOT NULL,
     "address" VARCHAR(255) NOT NULL,
-    "sales_owner" UUID REFERENCES users(id),
+    "sales_owner" UUID NOT NULL,
     "email" VARCHAR(255) NOT NULL UNIQUE,
     "company_size" VARCHAR(255) NOT NULL,
     "industry" VARCHAR(255) NOT NULL,
@@ -13,7 +13,7 @@ CREATE TABLE "companies"(
     "image" TEXT,
     "website" TEXT,
     "created_at" TIMESTAMPTZ DEFAULT now(),
-    "updated_at" TIMESTAMPTZ DEFAULT now()
-    "deleted_at" TIMESTAMPTZ DEFAULT NULL,
+    "updated_at" TIMESTAMPTZ DEFAULT now(),
+    "deleted_at" TIMESTAMPTZ DEFAULT NULL
 );
 
