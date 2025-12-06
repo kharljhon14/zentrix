@@ -37,19 +37,7 @@ func (app application) createCompanyHandler(w http.ResponseWriter, r *http.Reque
 		Website: input.Website,
 	}
 
-	v.Check(company.Name != "", "name", "name is required")
-	v.Check(len(company.Name) <= 255, "name", "name must not exceed 255 characters")
-
-	v.Check(company.Address != "", "address", "address is required")
-	v.Check(len(company.Address) <= 255, "address", "address must not exceed 255 characters")
-
-	v.Check(company.Email != "", "email", "email is required")
-
-	if !validator.Matches(company.Email, validator.EmailRX) {
-		v.AddError("email", "invalid email")
-	}
-
-	if !v.Valid() {
+	if data.ValidateCompany(v, company); !v.Valid() {
 		app.failedValidationResponse(w, v.Errors)
 		return
 	}
@@ -152,4 +140,93 @@ func (app application) listCompaniesHandler(w http.ResponseWriter, r *http.Reque
 		app.serverErrorResponse(w, err)
 	}
 
+}
+
+func (app application) updatedCompanyHandler(w http.ResponseWriter, r *http.Request) {
+	IDParam := chi.URLParam(r, "id")
+
+	var input struct {
+		Name    *string `json:"name"`
+		Address *string `json:"address"`
+		Email   *string `json:"email"`
+		Image   *string `json:"image"`
+		Website *string `json:"website"`
+	}
+
+	err := app.readJSON(w, r, &input)
+	if err != nil {
+		app.badRequestResponse(w, err)
+		return
+	}
+
+	if input.Name == nil &&
+		input.Address == nil &&
+		input.Email == nil &&
+		input.Image == nil &&
+		input.Website == nil {
+		app.badRequestResponse(w, errors.New("body must not be empty"))
+		return
+	}
+
+	v := validator.New()
+
+	v.Check(IDParam != "", "id", "id is required")
+	err = uuid.Validate(IDParam)
+	if err != nil {
+		v.AddError("id", "invalid id")
+	}
+
+	company, err := app.models.Companies.GetByID(uuid.MustParse(IDParam))
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			app.notFoundResponse(w, "company not found")
+		default:
+			app.serverErrorResponse(w, err)
+		}
+		return
+	}
+
+	if input.Name != nil {
+		company.Name = *input.Name
+	}
+
+	if input.Address != nil {
+		company.Address = *input.Address
+	}
+
+	if input.Email != nil {
+		company.Email = *input.Email
+	}
+
+	if input.Image != nil {
+		company.Image = input.Image
+	}
+
+	if input.Website != nil {
+		company.Website = input.Website
+	}
+
+	if data.ValidateCompany(v, company); !v.Valid() {
+		app.failedValidationResponse(w, v.Errors)
+		return
+	}
+
+	err = app.models.Companies.Update(company)
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrDuplicateEmail):
+			v.AddError("email", "email already in use")
+			app.failedValidationResponse(w, v.Errors)
+		default:
+			app.serverErrorResponse(w, err)
+		}
+
+		return
+	}
+
+	err = app.writeJSON(w, http.StatusOK, envelope{"company": company}, nil)
+	if err != nil {
+		app.serverErrorResponse(w, err)
+	}
 }

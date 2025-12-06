@@ -29,5 +29,6 @@ func (app *application) routes() http.Handler {
 	r.Post("/companies", app.createCompanyHandler)
 	r.Get("/companies", app.listCompaniesHandler)
 	r.Get("/companies/{id}", app.getCompanyByIDHandler)
+	r.Patch("/companies/{id}", app.updatedCompanyHandler)
 	return r
 }
