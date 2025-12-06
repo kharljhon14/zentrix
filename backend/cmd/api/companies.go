@@ -1,10 +1,13 @@
 package main
 
 import (
+	"database/sql"
 	"errors"
 	"fmt"
 	"net/http"
 
+	"github.com/go-chi/chi/v5"
+	"github.com/google/uuid"
 	"github.com/kharljhon14/zentrix/internal/data"
 	"github.com/kharljhon14/zentrix/internal/validator"
 )
@@ -67,7 +70,41 @@ func (app application) createCompanyHandler(w http.ResponseWriter, r *http.Reque
 	headers := make(http.Header)
 	headers.Set("Location", fmt.Sprintf("/companies/%s", company.ID))
 
-	err = app.writeJSON(w, http.StatusCreated, envelope{"company": company}, nil)
+	err = app.writeJSON(w, http.StatusCreated, envelope{"company": company}, headers)
+	if err != nil {
+		app.serverErrorResponse(w, err)
+	}
+}
+
+func (app application) getCompanyByIDHandler(w http.ResponseWriter, r *http.Request) {
+	IDParam := chi.URLParam(r, "id")
+
+	v := validator.New()
+
+	v.Check(IDParam != "", "id", "id is required")
+
+	err := uuid.Validate(IDParam)
+	if err != nil {
+		v.AddError("id", "invalid id")
+	}
+
+	if !v.Valid() {
+		app.failedValidationResponse(w, v.Errors)
+		return
+	}
+
+	company, err := app.models.Companies.GetByID(uuid.MustParse(IDParam))
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			app.notFoundResponse(w, "company not found")
+		default:
+			app.serverErrorResponse(w, err)
+		}
+		return
+	}
+
+	err = app.writeJSON(w, http.StatusOK, envelope{"company": company}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, err)
 	}

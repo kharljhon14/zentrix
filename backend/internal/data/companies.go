@@ -58,3 +58,29 @@ func (c CompanyModel) Insert(company *Company) error {
 
 	return nil
 }
+
+func (c CompanyModel) GetByID(ID uuid.UUID) (*Company, error) {
+	query := `
+		SELECT name, address, email, image, created_at, updated_at
+		FROM companies
+		WHERE ID = $1
+	`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	var company Company
+	err := c.DB.QueryRowContext(ctx, query, ID).Scan(
+		&company.Name,
+		&company.Address,
+		&company.Email,
+		&company.Image,
+		&company.CreatedAt,
+		&company.UpdatedAt,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return &company, nil
+}

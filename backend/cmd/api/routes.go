@@ -27,6 +27,6 @@ func (app *application) routes() http.Handler {
 
 	// Companies
 	r.Post("/companies", app.createCompanyHandler)
-
+	r.Get("/companies/{id}", app.getCompanyByIDHandler)
 	return r
 }
