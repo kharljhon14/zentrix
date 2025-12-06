@@ -84,3 +84,51 @@ func (c CompanyModel) GetByID(ID uuid.UUID) (*Company, error) {
 
 	return &company, nil
 }
+
+func (c CompanyModel) GetAll(filters Filters) ([]*Company, Metadata, error) {
+	query := fmt.Sprintf(`
+		SELECT count(id) OVER(), id, name, address, email, image, website, created_at, updated_at
+		FROM companies
+		ORDER BY %s %s, id ASC
+		LIMIT $1 OFFSET $2
+	`, filters.sortColumn(), filters.sortDirection())
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	args := []any{filters.limit(), filters.offset()}
+
+	rows, err := c.DB.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, Metadata{}, err
+	}
+	defer rows.Close()
+
+	totalRecords := 0
+	companies := []*Company{}
+
+	for rows.Next() {
+		var company Company
+
+		err := rows.Scan(
+			&totalRecords,
+			&company.ID,
+			&company.Name,
+			&company.Address,
+			&company.Email,
+			&company.Image,
+			&company.Website,
+			&company.CreatedAt,
+			&company.UpdatedAt,
+		)
+		if err != nil {
+			return nil, Metadata{}, err
+		}
+
+		companies = append(companies, &company)
+	}
+
+	metadata := calculateMetadata(totalRecords, filters.Page, filters.PageSize)
+
+	return companies, metadata, nil
+}

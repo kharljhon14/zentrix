@@ -109,3 +109,47 @@ func (app application) getCompanyByIDHandler(w http.ResponseWriter, r *http.Requ
 		app.serverErrorResponse(w, err)
 	}
 }
+
+func (app application) listCompaniesHandler(w http.ResponseWriter, r *http.Request) {
+	var input struct {
+		data.Filters
+	}
+
+	v := validator.New()
+	qs := r.URL.Query()
+
+	input.Page = app.readInt(qs, "page", 1, v)
+	input.PageSize = app.readInt(qs, "page_size", 10, v)
+	input.Sort = app.readString(qs, "sort", "id")
+	input.SortSafeList =
+		[]string{
+			"id",
+			"name",
+			"address",
+			"email",
+			"created_at",
+			"updated_at",
+			"-id",
+			"-name",
+			"-address",
+			"-created_at",
+			"-updated_at",
+		}
+
+	if data.ValidateFilters(v, input.Filters); !v.Valid() {
+		app.failedValidationResponse(w, v.Errors)
+		return
+	}
+
+	companies, metadata, err := app.models.Companies.GetAll(input.Filters)
+	if err != nil {
+		app.serverErrorResponse(w, err)
+		return
+	}
+
+	err = app.writeJSON(w, http.StatusOK, envelope{"companies": companies, "metadata": metadata}, nil)
+	if err != nil {
+		app.serverErrorResponse(w, err)
+	}
+
+}
