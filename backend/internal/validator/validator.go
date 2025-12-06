@@ -1,6 +1,9 @@
 package validator
 
-import "regexp"
+import (
+	"regexp"
+	"slices"
+)
 
 type Validator struct {
 	Errors map[string]string
@@ -34,4 +37,8 @@ func (v Validator) Check(ok bool, key, message string) {
 
 func Matches(value string, rx *regexp.Regexp) bool {
 	return rx.MatchString(value)
+}
+
+func PermittedValues[T comparable](value T, permittedValues ...T) bool {
+	return slices.Contains(permittedValues, value)
 }
