@@ -100,6 +100,43 @@ func (u UserModel) Update(user *User) error {
 	return nil
 }
 
+func (u UserModel) GetByID(ID uuid.UUID) (*User, error) {
+	query := `
+		SELECT 
+			id,
+			first_name,
+			last_name,
+			email,
+			activated,
+			role,
+			created_at,
+			updated_at
+		FROM USERS
+		WHERE id = $1
+	`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	var user User
+	err := u.DB.QueryRowContext(ctx, query, ID).Scan(
+		&user.ID,
+		&user.FirstName,
+		&user.LastName,
+		&user.Email,
+		&user.Activated,
+		&user.Role,
+		&user.CreatedAt,
+		&user.UpdatedAt,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+
+}
+
 func ValidateEmail(v *validator.Validator, email string) {
 	v.Check(email != "", "email", "email is required")
 	v.Check(validator.Matches(email, validator.EmailRX), "email", "invalid email")

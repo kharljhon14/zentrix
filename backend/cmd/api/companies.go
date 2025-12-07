@@ -246,7 +246,22 @@ func (app application) updatedCompanyHandler(w http.ResponseWriter, r *http.Requ
 	}
 
 	if input.SalesOwner != nil {
-		company.SalesOwner = uuid.MustParse(*input.SalesOwner)
+		salesOwnerID := uuid.MustParse(*input.SalesOwner)
+		_, err := app.models.Users.GetByID(salesOwnerID)
+		if err != nil {
+			fmt.Println(err)
+
+			switch {
+			case errors.Is(err, sql.ErrNoRows):
+				app.notFoundResponse(w, "sales_owner not found")
+			default:
+				app.serverErrorResponse(w, err)
+			}
+
+			return
+		}
+
+		company.SalesOwner = salesOwnerID
 	}
 
 	err = app.models.Companies.Update(company)
