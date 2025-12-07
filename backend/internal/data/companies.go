@@ -188,11 +188,28 @@ func (c CompanyModel) GetByIDWithSalesOwner(ID uuid.UUID) (*CompanyWithSalesOwne
 	return &company, nil
 }
 
-func (c CompanyModel) GetAll(filters Filters) ([]*Company, Metadata, error) {
+func (c CompanyModel) GetAll(filters Filters) ([]*CompanyWithSalesOwner, Metadata, error) {
 	query := fmt.Sprintf(`
-		SELECT count(id) OVER(), id, name, address, email, image, website, created_at, updated_at
-		FROM companies
-		ORDER BY %s %s, id ASC
+		SELECT 
+			count(c.id) over(),
+			c.id, 
+			c.name, 
+			c.address,
+			c.sales_owner,
+			CONCAT(u.first_name, ' ', u.last_name) AS sales_owner_name,
+			c.email, 
+			c.company_size, 
+			c.business_type,
+			c.industry, 
+			c.country, 
+			c.image, 
+			c.website,
+			c.created_at, 
+			c.updated_at
+		FROM companies c
+		JOIN users u
+		ON c.sales_owner = u.id
+		ORDER BY %s %s, c.id ASC
 		LIMIT $1 OFFSET $2
 	`, filters.sortColumn(), filters.sortDirection())
 
@@ -208,17 +225,23 @@ func (c CompanyModel) GetAll(filters Filters) ([]*Company, Metadata, error) {
 	defer rows.Close()
 
 	totalRecords := 0
-	companies := []*Company{}
+	companies := []*CompanyWithSalesOwner{}
 
 	for rows.Next() {
-		var company Company
+		var company CompanyWithSalesOwner
 
 		err := rows.Scan(
 			&totalRecords,
 			&company.ID,
 			&company.Name,
 			&company.Address,
+			&company.SalesOwner,
+			&company.SalesOwnerName,
 			&company.Email,
+			&company.CompanySize,
+			&company.BusinessType,
+			&company.Industry,
+			&company.Country,
 			&company.Image,
 			&company.Website,
 			&company.CreatedAt,
