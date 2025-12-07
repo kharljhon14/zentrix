@@ -14,11 +14,16 @@ import (
 
 func (app application) createCompanyHandler(w http.ResponseWriter, r *http.Request) {
 	var input struct {
-		Name    string  `json:"name"`
-		Address string  `json:"address"`
-		Email   string  `json:"email"`
-		Image   *string `json:"image"`
-		Website *string `json:"website"`
+		Name         string  `json:"name"`
+		Address      string  `json:"address"`
+		SalesOwner   string  `json:"sales_owner"`
+		Email        string  `json:"email"`
+		CompanySize  string  `json:"company_size"`
+		Industry     string  `json:"industry"`
+		BusinessType string  `json:"business_type"`
+		Country      string  `json:"country"`
+		Image        *string `json:"image"`
+		Website      *string `json:"website"`
 	}
 
 	err := app.readJSON(w, r, &input)
@@ -30,20 +35,29 @@ func (app application) createCompanyHandler(w http.ResponseWriter, r *http.Reque
 	v := validator.New()
 
 	company := &data.Company{
-		Name:    input.Name,
-		Address: input.Address,
-		Email:   input.Email,
-		Image:   input.Image,
-		Website: input.Website,
+		Name:         input.Name,
+		Address:      input.Address,
+		Email:        input.Email,
+		CompanySize:  input.CompanySize,
+		Industry:     input.Industry,
+		BusinessType: input.BusinessType,
+		Country:      input.Country,
+		Image:        input.Image,
+		Website:      input.Website,
 	}
 
+	// Validate the input values including the sales owner id format
+	v.ValidateUUID(input.SalesOwner, "sale_owner")
 	if data.ValidateCompany(v, company); !v.Valid() {
 		app.failedValidationResponse(w, v.Errors)
 		return
 	}
 
+	company.SalesOwner = uuid.MustParse(input.SalesOwner)
+
 	err = app.models.Companies.Insert(company)
 	if err != nil {
+		fmt.Println(err)
 		switch {
 		case errors.Is(err, data.ErrDuplicateEmail):
 			v.AddError("email", "email already in use")
@@ -70,19 +84,16 @@ func (app application) getCompanyByIDHandler(w http.ResponseWriter, r *http.Requ
 	v := validator.New()
 
 	v.Check(IDParam != "", "id", "id is required")
-
-	err := uuid.Validate(IDParam)
-	if err != nil {
-		v.AddError("id", "invalid id")
-	}
+	v.ValidateUUID(IDParam, "id")
 
 	if !v.Valid() {
 		app.failedValidationResponse(w, v.Errors)
 		return
 	}
 
-	company, err := app.models.Companies.GetByID(uuid.MustParse(IDParam))
+	company, err := app.models.Companies.GetByIDWithSalesOwner(uuid.MustParse(IDParam))
 	if err != nil {
+		fmt.Println(err)
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
 			app.notFoundResponse(w, "company not found")
@@ -146,11 +157,16 @@ func (app application) updatedCompanyHandler(w http.ResponseWriter, r *http.Requ
 	IDParam := chi.URLParam(r, "id")
 
 	var input struct {
-		Name    *string `json:"name"`
-		Address *string `json:"address"`
-		Email   *string `json:"email"`
-		Image   *string `json:"image"`
-		Website *string `json:"website"`
+		Name         *string `json:"name"`
+		Address      *string `json:"address"`
+		SalesOwner   *string `json:"sales_owner"`
+		Email        *string `json:"email"`
+		CompanySize  *string `json:"company_size"`
+		Industry     *string `json:"industry"`
+		BusinessType *string `json:"business_type"`
+		Country      *string `json:"country"`
+		Image        *string `json:"image"`
+		Website      *string `json:"website"`
 	}
 
 	err := app.readJSON(w, r, &input)
@@ -159,25 +175,23 @@ func (app application) updatedCompanyHandler(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	if input.Name == nil &&
-		input.Address == nil &&
-		input.Email == nil &&
-		input.Image == nil &&
-		input.Website == nil {
+	if app.isAllNil(input) {
 		app.badRequestResponse(w, errors.New("body must not be empty"))
 		return
 	}
 
 	v := validator.New()
 
+	// Validate UUIDs
 	v.Check(IDParam != "", "id", "id is required")
-	err = uuid.Validate(IDParam)
-	if err != nil {
-		v.AddError("id", "invalid id")
+	v.ValidateUUID(IDParam, "id")
+	if input.SalesOwner != nil {
+		v.ValidateUUID(*input.SalesOwner, "sales_owner")
 	}
 
 	company, err := app.models.Companies.GetByID(uuid.MustParse(IDParam))
 	if err != nil {
+		fmt.Println(err)
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
 			app.notFoundResponse(w, "company not found")
@@ -186,6 +200,9 @@ func (app application) updatedCompanyHandler(w http.ResponseWriter, r *http.Requ
 		}
 		return
 	}
+
+	// Merge only the non nil fields from the input
+	// into the existing company record.
 
 	if input.Name != nil {
 		company.Name = *input.Name
@@ -199,6 +216,22 @@ func (app application) updatedCompanyHandler(w http.ResponseWriter, r *http.Requ
 		company.Email = *input.Email
 	}
 
+	if input.CompanySize != nil {
+		company.CompanySize = *input.CompanySize
+	}
+
+	if input.BusinessType != nil {
+		company.BusinessType = *input.BusinessType
+	}
+
+	if input.Industry != nil {
+		company.Industry = *input.Industry
+	}
+
+	if input.Country != nil {
+		company.Country = *input.Country
+	}
+
 	if input.Image != nil {
 		company.Image = input.Image
 	}
@@ -210,6 +243,10 @@ func (app application) updatedCompanyHandler(w http.ResponseWriter, r *http.Requ
 	if data.ValidateCompany(v, company); !v.Valid() {
 		app.failedValidationResponse(w, v.Errors)
 		return
+	}
+
+	if input.SalesOwner != nil {
+		company.SalesOwner = uuid.MustParse(*input.SalesOwner)
 	}
 
 	err = app.models.Companies.Update(company)

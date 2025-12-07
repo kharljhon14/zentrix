@@ -8,6 +8,7 @@ import (
 	"maps"
 	"net/http"
 	"net/url"
+	"reflect"
 	"strconv"
 	"strings"
 
@@ -113,4 +114,15 @@ func (app application) readInt(qs url.Values, key string, defaultValue int, v *v
 	}
 
 	return i
+}
+
+func (app application) isAllNil(v any) bool {
+	val := reflect.ValueOf(v)
+	for i := 0; i < val.NumField(); i++ {
+		if !val.Field(i).IsNil() {
+			return false
+		}
+	}
+
+	return true
 }

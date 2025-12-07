@@ -163,7 +163,3 @@ func (p password) Matches(plainTextPassword string) (bool, error) {
 
 	return true, nil
 }
-
-func (u *User) IsAnonymous() bool {
-	return u == AnonymousUser
-}

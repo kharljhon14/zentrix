@@ -3,6 +3,8 @@ package validator
 import (
 	"regexp"
 	"slices"
+
+	"github.com/google/uuid"
 )
 
 type Validator struct {
@@ -41,4 +43,11 @@ func Matches(value string, rx *regexp.Regexp) bool {
 
 func PermittedValues[T comparable](value T, permittedValues ...T) bool {
 	return slices.Contains(permittedValues, value)
+}
+
+func (v Validator) ValidateUUID(ID, key string) {
+	err := uuid.Validate(ID)
+	if err != nil {
+		v.AddError(key, "invalid ID")
+	}
 }
