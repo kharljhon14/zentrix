@@ -158,7 +158,7 @@ func (c CompanyModel) GetByIDWithSalesOwner(ID uuid.UUID) (*CompanyWithSalesOwne
 		FROM companies c
 		JOIN users u
 		ON c.sales_owner = u.id
-		WHERE c.id = $1
+		WHERE c.id = $1 AND c.deleted_at = null
 	`
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
@@ -209,6 +209,7 @@ func (c CompanyModel) GetAll(filters Filters) ([]*CompanyWithSalesOwner, Metadat
 		FROM companies c
 		JOIN users u
 		ON c.sales_owner = u.id
+		WHERE c.deleted_at IS NULL
 		ORDER BY %s %s, c.id ASC
 		LIMIT $1 OFFSET $2
 	`, filters.sortColumn(), filters.sortDirection())
