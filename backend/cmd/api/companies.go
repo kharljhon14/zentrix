@@ -282,3 +282,30 @@ func (app application) updatedCompanyHandler(w http.ResponseWriter, r *http.Requ
 		app.serverErrorResponse(w, err)
 	}
 }
+
+func (app application) deleteCompanyHandler(w http.ResponseWriter, r *http.Request) {
+	IDParam := chi.URLParam(r, "id")
+
+	v := validator.New()
+
+	v.Check(IDParam != "", "id", "id is required")
+	v.ValidateUUID(IDParam, "id")
+
+	if !v.Valid() {
+		app.failedValidationResponse(w, v.Errors)
+		return
+	}
+
+	err := app.models.Companies.Delete(uuid.MustParse(IDParam))
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			app.notFoundResponse(w, "company not found")
+		default:
+			app.serverErrorResponse(w, err)
+		}
+		return
+	}
+
+	err = app.writeJSON(w, http.StatusOK, envelope{"message": "company deleted successfully"}, nil)
+}

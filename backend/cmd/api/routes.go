@@ -30,5 +30,6 @@ func (app *application) routes() http.Handler {
 	r.Get("/companies", app.listCompaniesHandler)
 	r.Get("/companies/{id}", app.getCompanyByIDHandler)
 	r.Patch("/companies/{id}", app.updatedCompanyHandler)
+	r.Delete("/companies/{id}", app.deleteCompanyHandler)
 	return r
 }

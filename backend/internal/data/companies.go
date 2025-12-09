@@ -312,6 +312,33 @@ func (c CompanyModel) Update(company *Company) error {
 
 }
 
+func (c CompanyModel) Delete(ID uuid.UUID) error {
+	query := `
+		UPDATE companies
+		set deleted_at = NOW()
+		WHERE id = $1 AND deleted_at IS NULL
+	`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	rows, err := c.DB.ExecContext(ctx, query, ID)
+	if err != nil {
+		return err
+	}
+
+	affected, err := rows.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if affected == 0 {
+		return sql.ErrNoRows
+	}
+
+	return nil
+}
+
 func ValidateCompany(v *validator.Validator, company *Company) {
 
 	v.Check(company.Name != "", "name", "name is required")
