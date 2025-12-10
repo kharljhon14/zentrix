@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+
 import { Link } from '@tanstack/react-router';
 import { Ellipsis } from 'lucide-react';
 
@@ -10,22 +11,33 @@ export default function CompanyCard() {
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle>Company Name</CardTitle>
-          <Tooltip>
-            <TooltipTrigger asChild>
+          <Popover>
+            <PopoverTrigger asChild>
               <Button
                 size="icon-sm"
                 variant="ghost"
               >
                 <Ellipsis />
               </Button>
-            </TooltipTrigger>
-            <TooltipContent>
+            </PopoverTrigger>
+            <PopoverContent className="w-40">
               <div className="flex flex-col gap-2">
-                <Link to="/">View Company</Link>
-                <button className=" cursor-pointer">Delete Company</button>
+                <Button
+                  size="sm"
+                  asChild
+                  variant="outline"
+                >
+                  <Link to="/">View Company</Link>
+                </Button>
+                <Button
+                  size="sm"
+                  variant="destructive"
+                >
+                  Delete Company
+                </Button>
               </div>
-            </TooltipContent>
-          </Tooltip>
+            </PopoverContent>
+          </Popover>
         </div>
       </CardHeader>
       <CardContent>
