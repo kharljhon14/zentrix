@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as DashboardRouteImport } from './routes/_dashboard'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardDashboardRouteImport } from './routes/_dashboard.dashboard'
+import { Route as DashboardCompaniesRouteImport } from './routes/_dashboard.companies'
 
 const DashboardRoute = DashboardRouteImport.update({
   id: '/_dashboard',
@@ -27,27 +28,40 @@ const DashboardDashboardRoute = DashboardDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => DashboardRoute,
 } as any)
+const DashboardCompaniesRoute = DashboardCompaniesRouteImport.update({
+  id: '/companies',
+  path: '/companies',
+  getParentRoute: () => DashboardRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/companies': typeof DashboardCompaniesRoute
   '/dashboard': typeof DashboardDashboardRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/companies': typeof DashboardCompaniesRoute
   '/dashboard': typeof DashboardDashboardRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_dashboard': typeof DashboardRouteWithChildren
+  '/_dashboard/companies': typeof DashboardCompaniesRoute
   '/_dashboard/dashboard': typeof DashboardDashboardRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/dashboard'
+  fullPaths: '/' | '/companies' | '/dashboard'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/dashboard'
-  id: '__root__' | '/' | '/_dashboard' | '/_dashboard/dashboard'
+  to: '/' | '/companies' | '/dashboard'
+  id:
+    | '__root__'
+    | '/'
+    | '/_dashboard'
+    | '/_dashboard/companies'
+    | '/_dashboard/dashboard'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -78,14 +92,23 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardDashboardRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/_dashboard/companies': {
+      id: '/_dashboard/companies'
+      path: '/companies'
+      fullPath: '/companies'
+      preLoaderRoute: typeof DashboardCompaniesRouteImport
+      parentRoute: typeof DashboardRoute
+    }
   }
 }
 
 interface DashboardRouteChildren {
+  DashboardCompaniesRoute: typeof DashboardCompaniesRoute
   DashboardDashboardRoute: typeof DashboardDashboardRoute
 }
 
 const DashboardRouteChildren: DashboardRouteChildren = {
+  DashboardCompaniesRoute: DashboardCompaniesRoute,
   DashboardDashboardRoute: DashboardDashboardRoute,
 }
 
