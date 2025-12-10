@@ -1,4 +1,5 @@
-import CompanyList from '@/features/company/company-list';
+import CompanyList from '@/features/company/components/company-list';
+import NewCompanyModal from '@/features/company/components/new-company-modal';
 import { createFileRoute } from '@tanstack/react-router';
 
 export const Route = createFileRoute('/_dashboard/companies')({
@@ -7,7 +8,10 @@ export const Route = createFileRoute('/_dashboard/companies')({
 
 function RouteComponent() {
   return (
-    <div>
+    <div className="p-8">
+      <div className="ml-auto w-fit mb-6">
+        <NewCompanyModal />
+      </div>
       <CompanyList />
     </div>
   );
