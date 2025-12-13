@@ -1,3 +1,5 @@
+import { createFileRoute } from '@tanstack/react-router';
+
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -10,7 +12,6 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { createFileRoute } from '@tanstack/react-router';
 
 export const Route = createFileRoute('/')({
   component: RouteComponent

@@ -1,6 +1,7 @@
+import { createFileRoute } from '@tanstack/react-router';
+
 import CompanyList from '@/features/company/components/company-list';
 import NewCompanyModal from '@/features/company/components/new-company-modal';
-import { createFileRoute } from '@tanstack/react-router';
 
 export const Route = createFileRoute('/_dashboard/companies')({
   component: RouteComponent

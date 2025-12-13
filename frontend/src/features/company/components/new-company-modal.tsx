@@ -1,3 +1,6 @@
+import { CirclePlus } from 'lucide-react';
+
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -6,9 +9,8 @@ import {
   DialogTitle,
   DialogTrigger
 } from '@/components/ui/dialog';
+
 import CompanyForm from './company-form';
-import { Button } from '@/components/ui/button';
-import { CirclePlus } from 'lucide-react';
 
 export default function NewCompanyModal() {
   return (

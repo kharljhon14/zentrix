@@ -1,9 +1,9 @@
+import { Link } from '@tanstack/react-router';
+import { Ellipsis } from 'lucide-react';
+
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-
-import { Link } from '@tanstack/react-router';
-import { Ellipsis } from 'lucide-react';
 
 export default function CompanyCard() {
   return (

@@ -1,15 +1,4 @@
 import {
-  Sidebar,
-  SidebarContent,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem
-} from '@/components/ui/sidebar';
-import {
   BookUser,
   Building2,
   Calendar,
@@ -18,10 +7,21 @@ import {
   Logs,
   NotepadText,
   Settings,
-  ShieldUser,
   SquareKanban
 } from 'lucide-react';
 import type { JSX } from 'react';
+
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem
+} from '@/components/ui/sidebar';
+
 import SidebarItem from './sidebar-item';
 
 export type SidebarItem = {

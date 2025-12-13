@@ -1,8 +1,9 @@
 import { PanelLeft } from 'lucide-react';
+
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Button } from '../ui/button';
-import { useSidebar } from '../ui/sidebar';
 import { Separator } from '../ui/separator';
+import { useSidebar } from '../ui/sidebar';
 
 export default function Header() {
   const { toggleSidebar } = useSidebar();
