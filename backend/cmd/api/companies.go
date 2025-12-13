@@ -103,7 +103,7 @@ func (app application) getCompanyByIDHandler(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	err = app.writeJSON(w, http.StatusOK, envelope{"company": company}, nil)
+	err = app.writeJSON(w, http.StatusOK, envelope{"data": company}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, err)
 	}
@@ -146,7 +146,7 @@ func (app application) listCompaniesHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	err = app.writeJSON(w, http.StatusOK, envelope{"companies": companies, "metadata": metadata}, nil)
+	err = app.writeJSON(w, http.StatusOK, envelope{"data": companies, "metadata": metadata}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, err)
 	}
@@ -277,7 +277,7 @@ func (app application) updatedCompanyHandler(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	err = app.writeJSON(w, http.StatusOK, envelope{"company": company}, nil)
+	err = app.writeJSON(w, http.StatusOK, envelope{"data": company}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, err)
 	}
