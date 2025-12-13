@@ -158,7 +158,7 @@ func (c CompanyModel) GetByIDWithSalesOwner(ID uuid.UUID) (*CompanyWithSalesOwne
 		FROM companies c
 		JOIN users u
 		ON c.sales_owner = u.id
-		WHERE c.id = $1 AND c.deleted_at = null
+		WHERE c.id = $1 AND c.deleted_at IS NULL
 	`
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
