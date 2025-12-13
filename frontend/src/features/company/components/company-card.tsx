@@ -4,6 +4,7 @@ import { Ellipsis } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+
 import type { Company } from '../types/company';
 
 interface Props {
@@ -12,12 +13,26 @@ interface Props {
 
 export default function CompanyCard({ company }: Props) {
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle>{company.name}</CardTitle>
+    <Card className="w-96">
+      <CardHeader className="relative">
+        <div className="flex items-center justify-center">
+          <CardTitle>
+            <div className="flex flex-col items-center gap-2 justify-center">
+              <div className="rounded-2xl w-16 h-16 overflow-hidden block">
+                <img
+                  className="w-full h-full object-cover"
+                  src={company.image}
+                  alt={company.name}
+                />
+              </div>
+              <p>{company.name}</p>
+            </div>
+          </CardTitle>
           <Popover>
-            <PopoverTrigger asChild>
+            <PopoverTrigger
+              asChild
+              className="absolute -top-2 right-4"
+            >
               <Button
                 size="icon-sm"
                 variant="ghost"
@@ -49,12 +64,13 @@ export default function CompanyCard({ company }: Props) {
         <p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Dicta, officia?</p>
       </CardContent>
       <CardFooter>
-        <div>
+        <div className="flex justify-between w-full">
           <div>
             <small>Related contacts</small>
           </div>
-          <div>
-            <small>Sales owner</small>
+          <div className="text-xs">
+            <p>Sales owner</p>
+            <p>{company.sales_owner_name}</p>
           </div>
         </div>
       </CardFooter>
