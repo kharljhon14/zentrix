@@ -119,7 +119,7 @@ func (app application) listCompaniesHandler(w http.ResponseWriter, r *http.Reque
 
 	input.Page = app.readInt(qs, "page", 1, v)
 	input.PageSize = app.readInt(qs, "page_size", 10, v)
-	input.Sort = app.readString(qs, "sort", "id")
+	input.Sort = app.readString(qs, "sort", "-created_at")
 	input.SortSafeList =
 		[]string{
 			"id",

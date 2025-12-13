@@ -210,7 +210,7 @@ func (c CompanyModel) GetAll(filters Filters) ([]*CompanyWithSalesOwner, Metadat
 		JOIN users u
 		ON c.sales_owner = u.id
 		WHERE c.deleted_at IS NULL
-		ORDER BY %s %s, c.id ASC
+		ORDER BY %s %s, c.created_at DESC
 		LIMIT $1 OFFSET $2
 	`, filters.sortColumn(), filters.sortDirection())
 
