@@ -10,15 +10,21 @@ import pluginQuery from '@tanstack/eslint-plugin-query';
 
 export default defineConfig([
   globalIgnores(['dist']),
+
   {
     files: ['**/*.{ts,tsx}'],
-    extends: [js.configs.recommended, tseslint.configs.recommended, reactRefresh.configs.vite],
+
+    extends: [
+      js.configs.recommended,
+      ...tseslint.configs.recommended,
+      reactRefresh.configs.recommended
+    ],
+
     ignores: [
       'node_modules/**',
       '.next/**',
       'out/**',
       'build/**',
-      'dist/**',
       'coverage/**',
       '.turbo/**',
       '.vercel/**',
@@ -31,22 +37,34 @@ export default defineConfig([
       '**/*.d.ts',
       'src/components/ui/**'
     ],
+
     languageOptions: {
       ecmaVersion: 2020,
-      globals: globals.browser
+      globals: globals.browser,
+      parserOptions: {
+        ecmaFeatures: {
+          jsx: true
+        }
+      }
     },
+
     plugins: {
       'simple-import-sort': simpleImportSort,
       'unused-imports': unusedImports,
       '@tanstack/query': pluginQuery
     },
+
     rules: {
       // --- import sorting ---
       'simple-import-sort/imports': 'error',
       'simple-import-sort/exports': 'error',
 
-      // --- unused imports/vars ---
+      // --- unused imports ---
       'unused-imports/no-unused-imports': 'error',
+
+      // disable base rule in favor of unused-imports
+      '@typescript-eslint/no-unused-vars': 'off',
+
       'unused-imports/no-unused-vars': [
         'warn',
         {
@@ -56,15 +74,8 @@ export default defineConfig([
           argsIgnorePattern: '^_'
         }
       ],
-      '@typescript-eslint/no-unused-vars': [
-        'warn',
-        {
-          vars: 'all',
-          varsIgnorePattern: '^_',
-          args: 'after-used',
-          argsIgnorePattern: '^_'
-        }
-      ],
+
+      // --- TanStack Query ---
       '@tanstack/query/exhaustive-deps': 'error'
     }
   }

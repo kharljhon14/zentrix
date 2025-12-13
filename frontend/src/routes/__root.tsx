@@ -1,6 +1,7 @@
-import QueryProvider from '@/providers/query-provider';
 import { createRootRoute, Outlet } from '@tanstack/react-router';
 import * as React from 'react';
+
+import QueryProvider from '@/providers/query-provider';
 
 export const Route = createRootRoute({
   component: RootComponent

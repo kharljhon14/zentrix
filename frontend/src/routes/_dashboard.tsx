@@ -16,6 +16,7 @@ function RouteComponent() {
         <AppSidebar />
         <div className="w-full">
           <Header />
+
           <main className="">
             <Outlet />
           </main>
