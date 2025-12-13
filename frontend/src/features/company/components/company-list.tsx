@@ -1,30 +1,23 @@
-import useGetCompany from '../hooks/api/use-get-company';
+import { Card } from '@/components/ui/card';
+import useGetCompanies from '../hooks/api/use-get-companies';
 import CompanyCard from './company-card';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function CompanyList() {
-  const companyQuery = useGetCompany('7bdcc34e-4236-4ef0-8efb-eda5b915e6a9');
+  const companiesQuery = useGetCompanies();
 
-  console.table(companyQuery.data);
+  if (companiesQuery.isLoading) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+        <Skeleton className="h-44 w-64 rounded-xl bg-neutral-400" />
+        <Skeleton className="h-44 w-64 rounded-xl bg-neutral-400" />
+        <Skeleton className="h-44 w-64 rounded-xl bg-neutral-400" />
+        <Skeleton className="h-44 w-64 rounded-xl bg-neutral-400" />
+        <Skeleton className="h-44 w-64 rounded-xl bg-neutral-400" />
+      </div>
+    );
+  }
 
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-      <CompanyCard />
-      <CompanyCard />
-      <CompanyCard />
-      <CompanyCard />
-      <CompanyCard />
-      <CompanyCard />
-      <CompanyCard />
-      <CompanyCard />
-      <CompanyCard />
-      <CompanyCard />
-      <CompanyCard />
-      <CompanyCard />
-      <CompanyCard />
-      <CompanyCard />
-      <CompanyCard />
-      <CompanyCard />
-      <CompanyCard />
-    </div>
-  );
+  if (companiesQuery.isSuccess)
+    return <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6"></div>;
 }

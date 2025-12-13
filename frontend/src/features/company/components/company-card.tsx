@@ -4,13 +4,18 @@ import { Ellipsis } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import type { Company } from '../types/company';
 
-export default function CompanyCard() {
+interface Props {
+  company: Company;
+}
+
+export default function CompanyCard({ company }: Props) {
   return (
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle>Company Name</CardTitle>
+          <CardTitle>{company.name}</CardTitle>
           <Popover>
             <PopoverTrigger asChild>
               <Button
@@ -44,7 +49,14 @@ export default function CompanyCard() {
         <p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Dicta, officia?</p>
       </CardContent>
       <CardFooter>
-        <small>Insert related contacts</small>
+        <div>
+          <div>
+            <small>Related contacts</small>
+          </div>
+          <div>
+            <small>Sales owner</small>
+          </div>
+        </div>
       </CardFooter>
     </Card>
   );

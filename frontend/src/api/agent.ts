@@ -37,7 +37,7 @@ const companies = {
   getById: (id: string) =>
     requests.get<Omit<DataResponse<Company>, 'metadata'>>(`${BASE_URL}/companies/${id}`),
   getCompanies: (page?: number, pageSize?: number, sort?: string) =>
-    requests.get(`${BASE_URL}/companies`),
+    requests.get<DataResponse<Company>>(`${BASE_URL}/companies`),
   create: () => requests.post(`${BASE_URL}/companies`, {}),
   update: () => requests.patch(`${BASE_URL}/companies`, {}),
   delete: (id: string) => requests.delete(`${BASE_URL}/companies/${id}`)
