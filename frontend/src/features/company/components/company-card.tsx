@@ -13,7 +13,7 @@ interface Props {
 
 export default function CompanyCard({ company }: Props) {
   return (
-    <Card className="w-96">
+    <Card>
       <CardHeader className="relative">
         <div className="flex items-center justify-center">
           <CardTitle>
@@ -21,7 +21,7 @@ export default function CompanyCard({ company }: Props) {
               <div className="rounded-2xl w-16 h-16 overflow-hidden block">
                 <img
                   className="w-full h-full object-cover"
-                  src={company.image}
+                  src={company.image ? company.image : 'https://placehold.net/building-400x400.png'}
                   alt={company.name}
                 />
               </div>
