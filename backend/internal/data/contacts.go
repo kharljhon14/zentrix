@@ -3,6 +3,7 @@ package data
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -87,6 +88,7 @@ func (c ContactModel) GetByIDWithCompanyName(ID uuid.UUID) (*ContactWithCompanyN
 			c.updated_at
 		FROM contacts c
 		JOIN companies o
+		ON c.company_id = o.id
 		WHERE id = $1 AND deleted_at IS NULL
 	`
 
@@ -110,4 +112,68 @@ func (c ContactModel) GetByIDWithCompanyName(ID uuid.UUID) (*ContactWithCompanyN
 	}
 
 	return &contact, nil
+}
+
+// TODO: Get contacts with company id
+func (c ContactModel) GetAll(filter Filters) ([]*ContactWithCompanyName, Metadata, error) {
+	query := fmt.Sprintf(`
+		SELECT 
+			count(c.id) over(),
+			c.id,
+			c.name,
+			c.email,
+			o.id AS company_id,
+			o.name AS company_name,
+			c.title,
+			c.status,
+			c.created_at,
+			c.updated_at
+		FROM contacts c
+		JOIN companies o
+		ON c.company_id = o.id
+		WHERE c.deleted_at IS NULL
+		ORDER BY %s %s, c.created_at DESC
+		LIMIT $1 OFFSET $2
+		
+	`, filter.sortColumn(), filter.sortDirection())
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	args := []any{filter.limit(), filter.offset()}
+
+	rows, err := c.DB.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, Metadata{}, err
+	}
+	defer rows.Close()
+
+	totalRecords := 0
+	contacts := []*ContactWithCompanyName{}
+
+	for rows.Next() {
+		var contact ContactWithCompanyName
+
+		err := rows.Scan(
+			&totalRecords,
+			&contact.ID,
+			&contact.Name,
+			&contact.Email,
+			&contact.CompanyID,
+			&contact.CompanyName,
+			&contact.Title,
+			&contact.Status,
+			&contact.CreatedAt,
+			&contact.UpdatedAt,
+		)
+		if err != nil {
+			return nil, Metadata{}, err
+		}
+
+		contacts = append(contacts, &contact)
+	}
+
+	metadata := calculateMetadata(totalRecords, filter.Page, filter.PageSize)
+
+	return contacts, metadata, nil
 }
