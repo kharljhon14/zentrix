@@ -108,7 +108,7 @@ func (c ContactModel) GetByIDWithCompanyName(ID uuid.UUID) (*ContactWithCompanyN
 		FROM contacts c
 		JOIN companies o
 		ON c.company_id = o.id
-		WHERE id = $1 AND deleted_at IS NULL
+		WHERE c.id = $1 AND c.deleted_at IS NULL
 	`
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
@@ -120,7 +120,7 @@ func (c ContactModel) GetByIDWithCompanyName(ID uuid.UUID) (*ContactWithCompanyN
 		&contact.Name,
 		&contact.Email,
 		&contact.CompanyID,
-		&contact.CompanyID,
+		&contact.CompanyName,
 		&contact.Title,
 		&contact.Status,
 		&contact.CreatedAt,
