@@ -177,3 +177,43 @@ func (c ContactModel) GetAll(filter Filters) ([]*ContactWithCompanyName, Metadat
 
 	return contacts, metadata, nil
 }
+
+func (c ContactModel) Update(contact Contact) error {
+	query := `
+		UPDATE contacts
+			SET name = $1,
+			email = $2,
+			company_id = $3,
+			title = $4,
+			status = $5,
+			updated_at = NOW()
+		WHERE id = $6
+		RETURNING updated_at
+	`
+
+	args := []any{
+		contact.Name,
+		contact.Email,
+		contact.CompanyID,
+		contact.Title,
+		contact.Status,
+		contact.ID,
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	err := c.DB.QueryRowContext(ctx, query, args...).Scan(
+		&contact.UpdatedAt,
+	)
+	if err != nil {
+		switch {
+		case err.Error() == `pq: duplicate key value violates unique constraint "contacts_email_key"`:
+			return ErrDuplicateEmail
+		default:
+			return err
+		}
+	}
+
+	return nil
+}
