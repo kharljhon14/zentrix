@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/kharljhon14/zentrix/internal/validator"
 )
 
 type Contact struct {
@@ -20,11 +21,26 @@ type Contact struct {
 	UpdatedAt time.Time  `json:"updated_at"`
 }
 
+func (c Contact) ValidateContact(v *validator.Validator) {
+	v.Check(c.Name != "", "name", "name is required")
+	v.Check(len(c.Name) <= 255, "name", "name must not exceed 255 characters")
+
+	v.Check(c.Email != "", "email", "email is required")
+	if !validator.Matches(c.Email, validator.EmailRX) {
+		v.AddError("email", "invalid email")
+	}
+
+	v.Check(c.Title != "", "title", "title is required")
+	v.Check(len(c.Title) <= 255, "title", "title must not exceed 255 characters")
+	v.Check(c.Status != "", "status", "status is required")
+	v.Check(len(c.Status) <= 255, "status", "status must not exceed 255 characters")
+}
+
 type ContactModel struct {
 	DB *sql.DB
 }
 
-func (c ContactModel) Insert(contact Contact) error {
+func (c ContactModel) Insert(contact *Contact) error {
 	query := `
 		INSERT INTO contacts
 		(name, email, company_id, title, status)
@@ -52,6 +68,9 @@ func (c ContactModel) Insert(contact Contact) error {
 
 	if err != nil {
 		switch {
+		case err.Error() == `pq: insert or update on table "contacts" violates foreign key constraint "fk_company_id"`:
+			return ErrInvalidUUID
+
 		case err.Error() == `pq: duplicate key value violates unique constraint "contacts_email_key"`:
 			return ErrDuplicateEmail
 		default:

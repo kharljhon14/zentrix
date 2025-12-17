@@ -57,7 +57,7 @@ func (app application) createCompanyHandler(w http.ResponseWriter, r *http.Reque
 
 	err = app.models.Companies.Insert(company)
 	if err != nil {
-		fmt.Println(err)
+
 		switch {
 		case errors.Is(err, data.ErrDuplicateEmail):
 			v.AddError("email", "email already in use")

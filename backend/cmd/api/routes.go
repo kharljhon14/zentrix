@@ -43,5 +43,8 @@ func (app *application) routes() http.Handler {
 	r.Get("/companies/{id}", app.getCompanyByIDHandler)
 	r.Patch("/companies/{id}", app.updatedCompanyHandler)
 	r.Delete("/companies/{id}", app.deleteCompanyHandler)
+
+	// Contacts
+	r.Post("/contacts", app.createContactHandler)
 	return r
 }

@@ -11,12 +11,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-var (
-	ErrDuplicateEmail = errors.New("duplicate email")
-)
-
-var AnonymousUser = &User{}
-
 type User struct {
 	ID        uuid.UUID `json:"id"`
 	FirstName string    `json:"first_name"`
