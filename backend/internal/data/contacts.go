@@ -217,3 +217,30 @@ func (c ContactModel) Update(contact Contact) error {
 
 	return nil
 }
+
+func (c ContactModel) Delete(ID uuid.UUID) error {
+	query := `
+		UPDATE contacts
+			SET deleted_at = NOW()
+		WHERE id = $1 AND deleted_at IS NULL
+	`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	rows, err := c.DB.ExecContext(ctx, query, ID)
+	if err != nil {
+		return err
+	}
+
+	affected, err := rows.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if affected == 0 {
+		return sql.ErrNoRows
+	}
+
+	return nil
+}
