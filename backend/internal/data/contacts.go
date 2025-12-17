@@ -133,9 +133,32 @@ func (c ContactModel) GetByIDWithCompanyName(ID uuid.UUID) (*ContactWithCompanyN
 	return &contact, nil
 }
 
-// TODO: Get contacts with company id
-func (c ContactModel) GetAll(filter Filters) ([]*ContactWithCompanyName, Metadata, error) {
-	query := fmt.Sprintf(`
+func (c ContactModel) GetAll(filter Filters, companyID *uuid.UUID) ([]*ContactWithCompanyName, Metadata, error) {
+	query := ""
+
+	if companyID != nil {
+		query = fmt.Sprintf(`
+		SELECT 
+			count(c.id) over(),
+			c.id,
+			c.name,
+			c.email,
+			o.id AS company_id,
+			o.name AS company_name,
+			c.title,
+			c.status,
+			c.created_at,
+			c.updated_at
+		FROM contacts c
+		JOIN companies o
+		ON c.company_id = o.id
+		WHERE o.id = '%s' AND c.deleted_at IS NULL
+		ORDER BY %s %s, c.created_at DESC
+		LIMIT $1 OFFSET $2
+		
+	`, *companyID, filter.sortColumn(), filter.sortDirection())
+	} else {
+		query = fmt.Sprintf(`
 		SELECT 
 			count(c.id) over(),
 			c.id,
@@ -155,6 +178,7 @@ func (c ContactModel) GetAll(filter Filters) ([]*ContactWithCompanyName, Metadat
 		LIMIT $1 OFFSET $2
 		
 	`, filter.sortColumn(), filter.sortDirection())
+	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
