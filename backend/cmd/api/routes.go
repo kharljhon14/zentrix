@@ -49,5 +49,6 @@ func (app *application) routes() http.Handler {
 	r.Get("/contacts", app.listContactsHandler)
 	r.Get("/contacts/{id}", app.getContactByIDHandler)
 	r.Patch("/contacts/{id}", app.updateContactHandler)
+	r.Delete("/contacts/{id}", app.deleteContactHandler)
 	return r
 }

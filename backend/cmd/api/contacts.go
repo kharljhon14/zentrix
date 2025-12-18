@@ -257,3 +257,32 @@ func (app application) updateContactHandler(w http.ResponseWriter, r *http.Reque
 	}
 
 }
+
+func (app application) deleteContactHandler(w http.ResponseWriter, r *http.Request) {
+	IDParam := chi.URLParam(r, "id")
+
+	v := validator.New()
+	v.ValidateUUID(IDParam, "id")
+
+	if !v.Valid() {
+		app.failedValidationResponse(w, v.Errors)
+		return
+	}
+
+	err := app.models.Contacts.Delete(uuid.MustParse(IDParam))
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			app.notFoundResponse(w, "contact not found")
+		default:
+			app.serverErrorResponse(w, err)
+		}
+
+		return
+	}
+
+	err = app.writeJSON(w, http.StatusOK, envelope{"message": "contact deleted successfully"}, nil)
+	if err != nil {
+		app.serverErrorResponse(w, err)
+	}
+}

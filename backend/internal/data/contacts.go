@@ -82,7 +82,7 @@ func (c ContactModel) Insert(contact *Contact) error {
 }
 
 type ContactWithCompanyName struct {
-	ID          uuid.UUID  `json:"uuid"`
+	ID          uuid.UUID  `json:"id"`
 	Name        string     `json:"name"`
 	Email       string     `json:"email"`
 	CompanyID   *uuid.UUID `json:"company_id"`
