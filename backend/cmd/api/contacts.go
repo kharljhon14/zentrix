@@ -161,3 +161,99 @@ func (app application) listContactsHandler(w http.ResponseWriter, r *http.Reques
 		app.serverErrorResponse(w, err)
 	}
 }
+
+func (app application) updateContactHandler(w http.ResponseWriter, r *http.Request) {
+	IDParam := chi.URLParam(r, "id")
+
+	var input struct {
+		Name      *string `json:"name"`
+		Email     *string `json:"email"`
+		CompanyID *string `json:"company_id"`
+		Title     *string `json:"title"`
+		Status    *string `json:"status"`
+	}
+
+	err := app.readJSON(w, r, &input)
+	if err != nil {
+		app.badRequestResponse(w, err)
+		return
+	}
+
+	if app.isAllNil(input) {
+		app.badRequestResponse(w, errors.New("body must not be empty"))
+		return
+	}
+
+	v := validator.New()
+
+	// Validate UUIDs
+	v.Check(IDParam != "", "id", "id is required")
+	v.ValidateUUID(IDParam, "id")
+	if input.CompanyID != nil {
+		v.ValidateUUID(*input.CompanyID, "company_id")
+	}
+
+	contact, err := app.models.Contacts.GetByID(uuid.MustParse(IDParam))
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			app.notFoundResponse(w, "contact not found")
+		default:
+			app.serverErrorResponse(w, err)
+		}
+		return
+	}
+
+	if input.Name != nil {
+		contact.Name = *input.Name
+	}
+
+	if input.Email != nil {
+		contact.Email = *input.Email
+	}
+
+	if input.CompanyID != nil {
+		companyID := uuid.MustParse(*input.CompanyID)
+		contact.CompanyID = &companyID
+	}
+
+	if input.Title != nil {
+		contact.Title = *input.Title
+	}
+
+	if input.Status != nil {
+		contact.Status = *input.Status
+	}
+
+	contact.ValidateContact(v)
+
+	if !v.Valid() {
+		app.failedValidationResponse(w, v.Errors)
+		return
+	}
+
+	err = app.models.Contacts.Update(contact)
+	if err != nil {
+		fmt.Println(err)
+
+		switch {
+		case errors.Is(err, data.ErrInvalidUUID):
+			v.AddError("company_id", "invalid company id")
+			app.failedValidationResponse(w, v.Errors)
+		case errors.Is(err, data.ErrDuplicateEmail):
+			v.AddError("email", "email already in use")
+			app.failedValidationResponse(w, v.Errors)
+
+		default:
+			app.serverErrorResponse(w, err)
+		}
+
+		return
+	}
+
+	err = app.writeJSON(w, http.StatusOK, envelope{"data": contact}, nil)
+	if err != nil {
+		app.serverErrorResponse(w, err)
+	}
+
+}

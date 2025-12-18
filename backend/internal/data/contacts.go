@@ -93,6 +93,42 @@ type ContactWithCompanyName struct {
 	UpdatedAt   time.Time  `json:"updated_at"`
 }
 
+func (c ContactModel) GetByID(ID uuid.UUID) (*Contact, error) {
+	query := `
+		SELECT 
+			id,
+			name,
+			email,
+			company_id,
+			title,
+			status,
+			created_at,
+			updated_at
+		FROM contacts 
+		WHERE id = $1 AND deleted_at IS NULL
+	`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	var contact Contact
+	err := c.DB.QueryRowContext(ctx, query, ID).Scan(
+		&contact.ID,
+		&contact.Name,
+		&contact.Email,
+		&contact.CompanyID,
+		&contact.Title,
+		&contact.Status,
+		&contact.CreatedAt,
+		&contact.UpdatedAt,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return &contact, nil
+}
+
 func (c ContactModel) GetByIDWithCompanyName(ID uuid.UUID) (*ContactWithCompanyName, error) {
 	query := `
 		SELECT 
@@ -221,7 +257,7 @@ func (c ContactModel) GetAll(filter Filters, companyID *uuid.UUID) ([]*ContactWi
 	return contacts, metadata, nil
 }
 
-func (c ContactModel) Update(contact Contact) error {
+func (c ContactModel) Update(contact *Contact) error {
 	query := `
 		UPDATE contacts
 			SET name = $1,
@@ -230,7 +266,7 @@ func (c ContactModel) Update(contact Contact) error {
 			title = $4,
 			status = $5,
 			updated_at = NOW()
-		WHERE id = $6
+		WHERE id = $6 AND deleted_at IS NULL
 		RETURNING updated_at
 	`
 
@@ -251,6 +287,8 @@ func (c ContactModel) Update(contact Contact) error {
 	)
 	if err != nil {
 		switch {
+		case err.Error() == `pq: insert or update on table "contacts" violates foreign key constraint "fk_company_id"`:
+			return ErrInvalidUUID
 		case err.Error() == `pq: duplicate key value violates unique constraint "contacts_email_key"`:
 			return ErrDuplicateEmail
 		default:

@@ -249,8 +249,6 @@ func (app application) updatedCompanyHandler(w http.ResponseWriter, r *http.Requ
 		salesOwnerID := uuid.MustParse(*input.SalesOwner)
 		_, err := app.models.Users.GetByID(salesOwnerID)
 		if err != nil {
-			fmt.Println(err)
-
 			switch {
 			case errors.Is(err, sql.ErrNoRows):
 				app.notFoundResponse(w, "sales_owner not found")
@@ -308,4 +306,7 @@ func (app application) deleteCompanyHandler(w http.ResponseWriter, r *http.Reque
 	}
 
 	err = app.writeJSON(w, http.StatusOK, envelope{"message": "company deleted successfully"}, nil)
+	if err != nil {
+		app.serverErrorResponse(w, err)
+	}
 }

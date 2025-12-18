@@ -48,5 +48,6 @@ func (app *application) routes() http.Handler {
 	r.Post("/contacts", app.createContactHandler)
 	r.Get("/contacts", app.listContactsHandler)
 	r.Get("/contacts/{id}", app.getContactByIDHandler)
+	r.Patch("/contacts/{id}", app.updateContactHandler)
 	return r
 }
