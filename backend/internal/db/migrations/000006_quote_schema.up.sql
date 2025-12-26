@@ -8,6 +8,9 @@ CREATE TABLE IF NOT EXISTS "quotes" (
     "notes" TEXT,
     "prepared_by" UUID NOT NULL,
     "prepared_for" UUID NOT NULL,
+    "created_at" TIMESTAMPTZ DEFAULT now(),
+    "updated_at" TIMESTAMPTZ DEFAULT now(),
+
 
     CONSTRAINT fk_prepared_by 
         FOREIGN KEY ("prepared_by") REFERENCES "users"(id),
