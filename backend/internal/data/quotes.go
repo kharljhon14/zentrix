@@ -3,6 +3,7 @@ package data
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -95,4 +96,96 @@ func (q QuoteModel) GetByID(ID uuid.UUID) (*Quote, error) {
 	}
 
 	return &quote, nil
+}
+
+type QuoteWithRelationNames struct {
+	ID              uuid.UUID `json:"id"`
+	Name            string    `json:"name"`
+	CompanyID       uuid.UUID `json:"company_id"`
+	CompanyName     string    `json:"company_name"`
+	TotalAmount     int       `json:"total_amount"`
+	SalesTax        int       `json:"sales_tax"`
+	Stage           string    `json:"stage"`
+	Notes           string    `json:"notes"`
+	PreparedBy      uuid.UUID `json:"prepared_by"`
+	PreparedByName  string    `json:"prepared_by_name"`
+	PreparedFor     uuid.UUID `json:"prepared_for"`
+	PreparedForName string    `json:"prepared_for_name"`
+	CreatedAt       time.Time `json:"created_at"`
+	UpdatedAt       time.Time `json:"updated_at"`
+}
+
+func (q QuoteModel) GetAll(filter Filters) ([]*QuoteWithRelationNames, Metadata, error) {
+	query := fmt.Sprintf(`
+		SELECT
+			count(q.id) over(),
+			q.id,
+			q.name,
+			q.company_id,
+			c.name AS company_name,
+			q.total_amount,
+			q.sales_tax,
+			q.stage,
+			q.notes,
+			cn.id AS prepared_by,
+			cn.name AS prepared_by_name,
+			cnb.id AS prepared_for,
+			cnb.name AS prepared_for_name,
+			q.created_at,
+			q.updated_at
+		FROM quotes q
+		JOIN companies c
+			ON q.company_id = c.id
+		JOIN contacts cn
+			ON q.prepared_by = cn.id
+		JOIN contacts cnb
+			ON q.prepared_for = cnb.id
+		ORDER BY %s %s, q.created_at DESC
+		LIMIT $1 OFFSET $2
+	`, filter.sortColumn(), filter.sortDirection())
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	args := []any{filter.limit(), filter.offset()}
+
+	rows, err := q.DB.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, Metadata{}, err
+	}
+	defer rows.Close()
+
+	totalRecords := 0
+	quotes := []*QuoteWithRelationNames{}
+
+	for rows.Next() {
+		var quote QuoteWithRelationNames
+
+		err := rows.Scan(
+			&totalRecords,
+			&quote.ID,
+			&quote.Name,
+			&quote.CompanyID,
+			&quote.CompanyName,
+			&quote.TotalAmount,
+			&quote.SalesTax,
+			&quote.Stage,
+			&quote.Notes,
+			&quote.PreparedBy,
+			&quote.PreparedByName,
+			&quote.PreparedFor,
+			&quote.PreparedForName,
+			&quote.CreatedAt,
+			&quote.UpdatedAt,
+		)
+		if err != nil {
+			return nil, Metadata{}, err
+		}
+
+		quotes = append(quotes, &quote)
+	}
+
+	metadata := calculateMetadata(totalRecords, filter.Page, filter.PageSize)
+
+	return quotes, metadata, nil
 }
