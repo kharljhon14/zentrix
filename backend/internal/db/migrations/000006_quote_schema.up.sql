@@ -2,7 +2,6 @@ CREATE TABLE IF NOT EXISTS "quotes" (
     "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     "name" VARCHAR(255) NOT NULL,
     "company_id" UUID NOT NULL,
-    "total_amount" INTEGER NOT NULL,
     "sales_tax" INTEGER DEFAULT 0,
     "stage" VARCHAR(255),
     "notes" TEXT,
