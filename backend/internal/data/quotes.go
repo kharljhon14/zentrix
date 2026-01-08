@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/kharljhon14/zentrix/internal/validator"
 )
 
 type Quote struct {
@@ -188,4 +189,14 @@ func (q QuoteModel) GetAll(filter Filters) ([]*QuoteWithRelationNames, Metadata,
 	metadata := calculateMetadata(totalRecords, filter.Page, filter.PageSize)
 
 	return quotes, metadata, nil
+}
+
+func (q Quote) ValidateQuote(v *validator.Validator) {
+	v.Check(q.Name != "", "name", "name is required")
+	v.Check(len(q.Name) < 255, "name", "name must not exceed 255 characters")
+	v.Check(q.TotalAmount > -1, "total_amount", "total_amount must be valid")
+	v.Check(q.SalesTax > -1, "sales_tax", "sales_tax must be valid")
+	v.Check(q.Stage != "", "stage", "stage is required")
+	v.Check(len(q.Stage) < 255, "stage", "stage must not exceed 255 characters")
+	v.Check(len(q.Notes) < 10000, "notes", "notes must not exceed 10,000 characters")
 }
