@@ -47,6 +47,10 @@ func (p ProductModel) Insert(product *Product) error {
 	)
 }
 
+func (p ProductModel) GetByQuoteID(ID uuid.UUID) ([]*Product, error) {
+	return nil, nil
+}
+
 func (p Product) ValidateProduct(v *validator.Validator) {
 	v.Check(p.Title != "", "title", "title is required")
 	v.Check(len(p.Title) < 255, "title", "title must not exceed 255 chaaracters")

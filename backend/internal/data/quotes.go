@@ -62,7 +62,6 @@ func (q QuoteModel) GetByID(ID uuid.UUID) (*Quote, error) {
 			id,
 			name,
 			company_id,
-			total_amount,
 			sales_tax,
 			stage,
 			notes,

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 
 	"github.com/kharljhon14/zentrix/internal/data"
@@ -138,4 +139,29 @@ func (app application) createQuoteHandler(w http.ResponseWriter, r *http.Request
 	if err != nil {
 		app.serverErrorResponse(w, err)
 	}
+}
+
+func (app application) getQuoteByIDHandler(w http.ResponseWriter, r *http.Request) {
+	IDParam := chi.URLParam(r, "id")
+
+	v := validator.New()
+	v.Check(IDParam != "", "id", "id is required")
+	if v.ValidateUUID(IDParam, "id"); !v.Valid() {
+		app.failedValidationResponse(w, v.Errors)
+		return
+	}
+
+	quote, err := app.models.Quotes.GetByID(uuid.MustParse(IDParam))
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			app.notFoundResponse(w, "quote not found")
+		default:
+			app.serverErrorResponse(w, err)
+		}
+		return
+	}
+
+	app.writeJSON(w, http.StatusOK, envelope{"data": quote}, nil)
+
 }
