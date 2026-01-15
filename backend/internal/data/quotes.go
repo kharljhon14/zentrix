@@ -14,7 +14,6 @@ type Quote struct {
 	ID          uuid.UUID `json:"id"`
 	Name        string    `json:"name"`
 	CompanyID   uuid.UUID `json:"company_id"`
-	TotalAmount int       `json:"total_amount"`
 	SalesTax    int       `json:"sales_tax"`
 	Stage       string    `json:"stage"`
 	Notes       string    `json:"notes"`
@@ -31,16 +30,15 @@ type QuoteModel struct {
 func (q QuoteModel) Insert(quote *Quote) error {
 	query := `
 		INSERT INTO quotes
-			(name, company_id, total_amount, sales_tax, stage, notes, prepared_by, prepared_for)
+			(name, company_id, sales_tax, stage, notes, prepared_by, prepared_for)
 		VALUES
-			($1, $2, $3, $4, $5, $6, $7, $8)
+			($1, $2, $3, $4, $5, $6, $7)
 		RETURNING id, created_at, updated_at
 	`
 
 	args := []any{
 		quote.Name,
 		quote.CompanyID,
-		quote.TotalAmount,
 		quote.SalesTax,
 		quote.Stage,
 		quote.Notes,
@@ -194,7 +192,6 @@ func (q QuoteModel) GetAll(filter Filters) ([]*QuoteWithRelationNames, Metadata,
 func (q Quote) ValidateQuote(v *validator.Validator) {
 	v.Check(q.Name != "", "name", "name is required")
 	v.Check(len(q.Name) < 255, "name", "name must not exceed 255 characters")
-	v.Check(q.TotalAmount > -1, "total_amount", "total_amount must be valid")
 	v.Check(q.SalesTax > -1, "sales_tax", "sales_tax must be valid")
 	v.Check(q.Stage != "", "stage", "stage is required")
 	v.Check(len(q.Stage) < 255, "stage", "stage must not exceed 255 characters")

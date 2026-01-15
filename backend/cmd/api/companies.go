@@ -63,6 +63,7 @@ func (app application) createCompanyHandler(w http.ResponseWriter, r *http.Reque
 			v.AddError("email", "email already in use")
 			app.failedValidationResponse(w, v.Errors)
 		default:
+			//TODO check for existing sales_owner
 			app.serverErrorResponse(w, err)
 		}
 

@@ -3,9 +3,11 @@ package main
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/google/uuid"
+
 	"github.com/kharljhon14/zentrix/internal/data"
 	"github.com/kharljhon14/zentrix/internal/validator"
 )
@@ -27,8 +29,13 @@ func (app application) createQuoteHandler(w http.ResponseWriter, r *http.Request
 		} `json:"products"`
 	}
 
-	v := validator.New()
+	err := app.readJSON(w, r, &input)
+	if err != nil {
+		app.badRequestResponse(w, err)
+		return
+	}
 
+	v := validator.New()
 	v.ValidateUUID(input.CompanyID, "company_id")
 	v.ValidateUUID(input.PreparedBy, "prepared_by")
 	v.ValidateUUID(input.PreparedFor, "prepared_for")
@@ -39,17 +46,12 @@ func (app application) createQuoteHandler(w http.ResponseWriter, r *http.Request
 		Stage:    input.Stage,
 		Notes:    input.Notes,
 	}
-
 	quote.ValidateQuote(v)
 
-	if !v.Valid() {
-		app.failedValidationResponse(w, v.Errors)
-		return
-	}
-
 	companyID := uuid.MustParse(input.CompanyID)
-	_, err := app.models.Companies.GetByID(companyID)
+	_, err = app.models.Companies.GetByID(companyID)
 	if err != nil {
+
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
 			app.notFoundResponse(w, "company not found")
@@ -87,8 +89,15 @@ func (app application) createQuoteHandler(w http.ResponseWriter, r *http.Request
 	quote.PreparedBy = preparedBy
 	quote.PreparedFor = prepareFor
 
+	if !v.Valid() {
+		app.failedValidationResponse(w, v.Errors)
+		return
+	}
+
 	err = app.models.Quotes.Insert(&quote)
 	if err != nil {
+
+		fmt.Println(err)
 		app.serverErrorResponse(w, err)
 		return
 	}
@@ -105,7 +114,7 @@ func (app application) createQuoteHandler(w http.ResponseWriter, r *http.Request
 		products = append(products, product)
 	}
 
-	for _, product := range products {
+	for i, product := range products {
 		product.ValidateProduct(v)
 
 		if !v.Valid() {
@@ -119,6 +128,7 @@ func (app application) createQuoteHandler(w http.ResponseWriter, r *http.Request
 			app.serverErrorResponse(w, err)
 			return
 		}
+		products[i] = product
 	}
 
 	err = app.writeJSON(w, http.StatusCreated, envelope{
