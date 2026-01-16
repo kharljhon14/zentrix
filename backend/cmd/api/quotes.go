@@ -162,6 +162,16 @@ func (app application) getQuoteByIDHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	app.writeJSON(w, http.StatusOK, envelope{"data": quote}, nil)
+	products, err := app.models.Products.GetProductsByQuoteID(quote.ID)
+	if err != nil {
+		fmt.Println(err)
+		app.serverErrorResponse(w, err)
+		return
+	}
+
+	app.writeJSON(w, http.StatusOK, envelope{"data": envelope{
+		"quote":    quote,
+		"products": products,
+	}}, nil)
 
 }

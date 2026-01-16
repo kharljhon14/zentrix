@@ -47,8 +47,50 @@ func (p ProductModel) Insert(product *Product) error {
 	)
 }
 
-func (p ProductModel) GetByQuoteID(ID uuid.UUID) ([]*Product, error) {
-	return nil, nil
+func (p ProductModel) GetProductsByQuoteID(ID uuid.UUID) ([]*Product, error) {
+	query := `
+		SELECT
+			id,
+			quote_id,
+			title,
+			unit_price,
+			quantity,
+			discount
+		FROM products
+		WHERE quote_id = $1
+	`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	rows, err := p.DB.QueryContext(ctx, query, ID)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	products := []*Product{}
+	for rows.Next() {
+		var product Product
+
+		err := rows.Scan(
+			&product.ID,
+			&product.QuoteID,
+			&product.Title,
+			&product.UnitPrice,
+			&product.Quantity,
+			&product.Discount,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		products = append(products, &product)
+	}
+
+	return products, nil
+
 }
 
 func (p Product) ValidateProduct(v *validator.Validator) {
