@@ -101,7 +101,6 @@ type QuoteWithRelationNames struct {
 	Name            string    `json:"name"`
 	CompanyID       uuid.UUID `json:"company_id"`
 	CompanyName     string    `json:"company_name"`
-	TotalAmount     int       `json:"total_amount"`
 	SalesTax        int       `json:"sales_tax"`
 	Stage           string    `json:"stage"`
 	Notes           string    `json:"notes"`
@@ -121,12 +120,11 @@ func (q QuoteModel) GetAll(filter Filters) ([]*QuoteWithRelationNames, Metadata,
 			q.name,
 			q.company_id,
 			c.name AS company_name,
-			q.total_amount,
 			q.sales_tax,
 			q.stage,
 			q.notes,
 			cn.id AS prepared_by,
-			cn.name AS prepared_by_name,
+			cn.first_name || ' ' || cn.last_name AS prepared_by_name,
 			cnb.id AS prepared_for,
 			cnb.name AS prepared_for_name,
 			q.created_at,
@@ -134,7 +132,7 @@ func (q QuoteModel) GetAll(filter Filters) ([]*QuoteWithRelationNames, Metadata,
 		FROM quotes q
 		JOIN companies c
 			ON q.company_id = c.id
-		JOIN contacts cn
+		JOIN users cn
 			ON q.prepared_by = cn.id
 		JOIN contacts cnb
 			ON q.prepared_for = cnb.id
@@ -158,14 +156,12 @@ func (q QuoteModel) GetAll(filter Filters) ([]*QuoteWithRelationNames, Metadata,
 
 	for rows.Next() {
 		var quote QuoteWithRelationNames
-
 		err := rows.Scan(
 			&totalRecords,
 			&quote.ID,
 			&quote.Name,
 			&quote.CompanyID,
 			&quote.CompanyName,
-			&quote.TotalAmount,
 			&quote.SalesTax,
 			&quote.Stage,
 			&quote.Notes,

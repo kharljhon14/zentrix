@@ -175,3 +175,52 @@ func (app application) getQuoteByIDHandler(w http.ResponseWriter, r *http.Reques
 	}}, nil)
 
 }
+
+func (app application) listQuotesHandler(w http.ResponseWriter, r *http.Request) {
+	var input struct {
+		data.Filters
+	}
+
+	v := validator.New()
+	qs := r.URL.Query()
+
+	input.Page = app.readInt(qs, "page", 1, v)
+	input.PageSize = app.readInt(qs, "page_size", 10, v)
+	input.Sort = app.readString(qs, "sort", "-created_at")
+	input.SortSafeList = []string{
+		"id",
+		"company_id",
+		"name",
+		"prepared_by",
+		"prepared_for",
+		"stage",
+		"created_at",
+		"updated_at",
+		"-id",
+		"-company_id",
+		"-name",
+		"-prepared_by",
+		"-prepared_for",
+		"-stage",
+		"-created_at",
+		"-updated_at",
+	}
+
+	if data.ValidateFilters(v, input.Filters); !v.Valid() {
+		app.failedValidationResponse(w, v.Errors)
+		return
+	}
+
+	quotes, metadata, err := app.models.Quotes.GetAll(input.Filters)
+	if err != nil {
+		fmt.Println(err)
+		app.serverErrorResponse(w, err)
+		return
+	}
+
+	err = app.writeJSON(w, http.StatusOK, envelope{"data": quotes, "metadata": metadata}, nil)
+	if err != nil {
+		app.serverErrorResponse(w, err)
+	}
+
+}

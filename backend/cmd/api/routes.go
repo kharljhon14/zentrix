@@ -54,5 +54,6 @@ func (app *application) routes() http.Handler {
 	// Quotes
 	r.Post("/quotes", app.createQuoteHandler)
 	r.Get("/quotes/{id}", app.getQuoteByIDHandler)
+	r.Get("/quotes", app.listQuotesHandler)
 	return r
 }
