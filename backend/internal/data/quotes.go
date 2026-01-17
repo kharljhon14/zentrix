@@ -217,6 +217,33 @@ func (q QuoteModel) Update(quote *Quote) error {
 
 }
 
+func (q QuoteModel) Delete(ID uuid.UUID) error {
+	query := `
+		DELETE FROM quotes
+		WHERE id = $1
+	`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	rows, err := q.DB.ExecContext(ctx, query, ID)
+	if err != nil {
+		return err
+	}
+
+	affected, err := rows.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if affected == 0 {
+		return sql.ErrNoRows
+	}
+
+	return nil
+
+}
+
 func (q Quote) ValidateQuote(v *validator.Validator) {
 	v.Check(q.Name != "", "name", "name is required")
 	v.Check(len(q.Name) < 255, "name", "name must not exceed 255 characters")

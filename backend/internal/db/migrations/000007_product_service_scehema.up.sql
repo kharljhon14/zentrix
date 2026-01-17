@@ -7,5 +7,7 @@ CREATE TABLE IF NOT EXISTS products(
     "discount" INTEGER DEFAULT 0,
 
     CONSTRAINT fk_qoute_id
-        FOREIGN KEY ("quote_id") REFERENCES "quotes"(id)
+        FOREIGN KEY ("quote_id")
+        REFERENCES "quotes"(id)
+        ON DELETE CASCADE
 );
