@@ -56,5 +56,6 @@ func (app *application) routes() http.Handler {
 	r.Get("/quotes/{id}", app.getQuoteByIDHandler)
 	r.Get("/quotes", app.listQuotesHandler)
 	r.Patch("/quotes/{id}", app.updateQuoteHandler)
+	r.Delete("/quotes/{id}", app.deleteQuoteHandler)
 	return r
 }
