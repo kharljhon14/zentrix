@@ -116,8 +116,8 @@ func (app application) readInt(qs url.Values, key string, defaultValue int, v *v
 	return i
 }
 
-func (app application) isAllNil(v any) bool {
-	val := reflect.ValueOf(v)
+func (app application) isAllNil(input any) bool {
+	val := reflect.ValueOf(input)
 	for i := 0; i < val.NumField(); i++ {
 		if !val.Field(i).IsNil() {
 			return false

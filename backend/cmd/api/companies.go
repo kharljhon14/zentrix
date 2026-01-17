@@ -192,7 +192,6 @@ func (app application) updatedCompanyHandler(w http.ResponseWriter, r *http.Requ
 
 	company, err := app.models.Companies.GetByID(uuid.MustParse(IDParam))
 	if err != nil {
-		fmt.Println(err)
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
 			app.notFoundResponse(w, "company not found")

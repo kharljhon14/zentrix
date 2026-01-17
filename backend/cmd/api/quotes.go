@@ -222,5 +222,128 @@ func (app application) listQuotesHandler(w http.ResponseWriter, r *http.Request)
 	if err != nil {
 		app.serverErrorResponse(w, err)
 	}
+}
 
+func (app application) updateQuoteHandler(w http.ResponseWriter, r *http.Request) {
+	IDParam := chi.URLParam(r, "id")
+
+	var input struct {
+		Name        *string `json:"name"`
+		CompanyID   *string `json:"company_id"`
+		Stage       *string `json:"stage"`
+		Notes       *string `json:"notes"`
+		PreparedBy  *string `json:"prepared_by"`
+		PreparedFor *string `json:"prepared_for"`
+	}
+
+	err := app.readJSON(w, r, &input)
+	if err != nil {
+		app.badRequestResponse(w, err)
+		return
+	}
+
+	if app.isAllNil(input) {
+		app.badRequestResponse(w, errors.New("body must not be empty"))
+		return
+	}
+
+	v := validator.New()
+	v.ValidateUUID(IDParam, "id")
+	if input.CompanyID != nil {
+		v.ValidateUUID(*input.CompanyID, "company_id")
+	}
+	if input.PreparedBy != nil {
+		v.ValidateUUID(*input.PreparedBy, "prepared_by")
+	}
+	if input.PreparedFor != nil {
+		v.ValidateUUID(*input.PreparedFor, "prepared_for")
+	}
+
+	if !v.Valid() {
+		app.failedValidationResponse(w, v.Errors)
+		return
+	}
+
+	quote, err := app.models.Quotes.GetByID(uuid.MustParse(IDParam))
+	if err != nil {
+		fmt.Println(err)
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			app.notFoundResponse(w, "quote not found")
+		default:
+			app.serverErrorResponse(w, err)
+		}
+		return
+	}
+
+	if input.Name != nil {
+		quote.Name = *input.Name
+	}
+	if input.CompanyID != nil {
+
+		quote.CompanyID = uuid.MustParse(*input.CompanyID)
+
+		_, err = app.models.Companies.GetByID(quote.CompanyID)
+		if err != nil {
+			switch {
+			case errors.Is(err, sql.ErrNoRows):
+				app.notFoundResponse(w, "company not found")
+			default:
+				app.serverErrorResponse(w, err)
+			}
+			return
+		}
+	}
+	if input.Stage != nil {
+		quote.Stage = *input.Stage
+	}
+	if input.Notes != nil {
+		quote.Notes = *input.Notes
+	}
+	if input.PreparedBy != nil {
+		quote.PreparedBy = uuid.MustParse(*input.PreparedBy)
+
+		_, err = app.models.Users.GetByID(quote.PreparedBy)
+		if err != nil {
+			switch {
+			case errors.Is(err, sql.ErrNoRows):
+				app.notFoundResponse(w, "user not found")
+			default:
+				app.serverErrorResponse(w, err)
+			}
+			return
+		}
+	}
+	if input.PreparedFor != nil {
+		quote.PreparedFor = uuid.MustParse(*input.PreparedFor)
+
+		_, err = app.models.Contacts.GetByID(quote.PreparedFor)
+		if err != nil {
+			switch {
+			case errors.Is(err, sql.ErrNoRows):
+				app.notFoundResponse(w, "contact not found")
+			default:
+				app.serverErrorResponse(w, err)
+			}
+			return
+		}
+	}
+
+	quote.ValidateQuote(v)
+	if !v.Valid() {
+		app.failedValidationResponse(w, v.Errors)
+		return
+	}
+
+	err = app.models.Quotes.Update(quote)
+	if err != nil {
+		fmt.Println(err)
+		app.serverErrorResponse(w, err)
+		return
+	}
+
+	err = app.writeJSON(w, http.StatusOK, envelope{"data": quote}, nil)
+	if err != nil {
+		app.serverErrorResponse(w, err)
+	}
 }

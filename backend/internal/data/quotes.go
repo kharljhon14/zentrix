@@ -184,6 +184,39 @@ func (q QuoteModel) GetAll(filter Filters) ([]*QuoteWithRelationNames, Metadata,
 	return quotes, metadata, nil
 }
 
+func (q QuoteModel) Update(quote *Quote) error {
+	query := `
+		UPDATE quotes
+		SET name = $1,
+		company_id = $2,
+		prepared_by = $3,
+		prepared_for = $4,
+		stage = $5,
+		notes = $6,
+		updated_at = NOW()
+		WHERE id = $7
+		returning updated_at
+	`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	args := []any{
+		quote.Name,
+		quote.CompanyID,
+		quote.PreparedBy,
+		quote.PreparedFor,
+		quote.Stage,
+		quote.Notes,
+		quote.ID,
+	}
+
+	return q.DB.QueryRowContext(ctx, query, args...).Scan(
+		&quote.UpdatedAt,
+	)
+
+}
+
 func (q Quote) ValidateQuote(v *validator.Validator) {
 	v.Check(q.Name != "", "name", "name is required")
 	v.Check(len(q.Name) < 255, "name", "name must not exceed 255 characters")
