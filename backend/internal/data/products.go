@@ -16,6 +16,8 @@ type Product struct {
 	UnitPrice int       `json:"unit_price"`
 	Quantity  int       `json:"quantity"`
 	Discount  int       `json:"discount"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 type ProductModel struct {
@@ -90,6 +92,38 @@ func (p ProductModel) GetProductsByQuoteID(ID uuid.UUID) ([]*Product, error) {
 	}
 
 	return products, nil
+
+}
+
+func (p ProductModel) Update(product *Product) (*Product, error) {
+	query := `
+		UPDATE products
+		SET title = $1,
+		unit_price = $2,
+		quantity = $3,
+		discount = $4,
+		updated_at = now()
+		WHERE id = $1
+		RETURNING updated_at
+	`
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	args := []any{
+		product.Title,
+		product.UnitPrice,
+		product.Quantity,
+		product.Discount,
+	}
+
+	err := p.DB.QueryRowContext(ctx, query, args...).Scan(
+		&product.UpdatedAt,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return product, nil
 
 }
 

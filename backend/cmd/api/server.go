@@ -21,5 +21,7 @@ func (app *application) serve() error {
 		return err
 	}
 
+	err = errors.New("New Error")
+
 	return nil
 }
