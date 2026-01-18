@@ -49,6 +49,42 @@ func (p ProductModel) Insert(product *Product) error {
 	)
 }
 
+func (p ProductModel) GetProductByID(ID uuid.UUID) (*Product, error) {
+	query := `
+		SELECT 
+			id, 
+			quote_id,
+			title,
+			unit_price,
+			quantity,
+			discount,
+			created_at,
+			updated_at
+		FROM products
+		WHERE id = $1
+	`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	var product Product
+	err := p.DB.QueryRowContext(ctx, query, ID).Scan(
+		&product.ID,
+		&product.QuoteID,
+		&product.Title,
+		&product.UnitPrice,
+		&product.Quantity,
+		&product.Discount,
+		&product.CreatedAt,
+		&product.UpdatedAt,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return &product, err
+}
+
 func (p ProductModel) GetProductsByQuoteID(ID uuid.UUID) ([]*Product, error) {
 	query := `
 		SELECT
@@ -124,6 +160,32 @@ func (p ProductModel) Update(product *Product) (*Product, error) {
 	}
 
 	return product, nil
+}
+
+func (p ProductModel) Delete(ID uuid.UUID) error {
+	query := `
+		DELETE FROM products
+		where id = $1
+	`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	rows, err := p.DB.ExecContext(ctx, query, ID)
+	if err != nil {
+		return err
+	}
+
+	affectedRows, err := rows.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if affectedRows == 0 {
+		return sql.ErrNoRows
+	}
+
+	return nil
 
 }
 

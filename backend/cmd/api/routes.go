@@ -60,5 +60,6 @@ func (app *application) routes() http.Handler {
 
 	// Products
 	r.Get("/products/{id}", app.getProductsByQuoteIDHandler)
+	r.Patch("/products/{id}", app.updateProductHandler)
 	return r
 }
