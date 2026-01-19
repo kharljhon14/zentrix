@@ -116,3 +116,28 @@ func (app application) updateProductHandler(w http.ResponseWriter, r *http.Reque
 	}
 
 }
+
+func (app application) deleteProductHandler(w http.ResponseWriter, r *http.Request) {
+	IDParam := chi.URLParam(r, "id")
+
+	v := validator.New()
+
+	v.ValidateUUID(IDParam, "id")
+
+	if !v.Valid() {
+		app.failedValidationResponse(w, v.Errors)
+		return
+	}
+
+	err := app.models.Products.Delete(uuid.MustParse(IDParam))
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			app.notFoundResponse(w, "product not found")
+		default:
+			app.serverErrorResponse(w, err)
+		}
+	}
+
+	app.writeJSON(w, http.StatusOK, envelope{"message": "product deleted successfully"}, nil)
+}

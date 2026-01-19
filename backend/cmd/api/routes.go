@@ -60,6 +60,8 @@ func (app *application) routes() http.Handler {
 
 	// Products
 	r.Get("/products/{id}", app.getProductsByQuoteIDHandler)
+	//TODO: 500 error for the created_at and updated_at
 	r.Patch("/products/{id}", app.updateProductHandler)
+	r.Delete("/products/{id}", app.deleteProductHandler)
 	return r
 }
