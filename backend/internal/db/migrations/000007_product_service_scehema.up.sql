@@ -5,11 +5,9 @@ CREATE TABLE IF NOT EXISTS products(
     "unit_price" INTEGER NOT NULL,
     "quantity" INTEGER NOT NULL,
     "discount" INTEGER DEFAULT 0,
-    "created_at" TIMESTAMPZ NOT NULL DEFAULT NOW(),
-    "updated_at" TIMESTAMPZ NOT NULL DEFAULT NOW(),
+    "created_at" TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    "updated_at" TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
     CONSTRAINT fk_qoute_id
-        FOREIGN KEY ("quote_id")
-        REFERENCES "quotes"(id)
-        ON DELETE CASCADE
+        FOREIGN KEY ("quote_id") REFERENCES "quotes"(id) ON DELETE CASCADE
 );
