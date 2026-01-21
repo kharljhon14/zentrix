@@ -18,6 +18,7 @@ type Models struct {
 	Contacts  ContactModel
 	Quotes    QuoteModel
 	Products  ProductModel
+	Projects  ProjectModel
 }
 
 func NewModels(db *sql.DB) Models {
@@ -28,5 +29,6 @@ func NewModels(db *sql.DB) Models {
 		Contacts:  ContactModel{DB: db},
 		Quotes:    QuoteModel{DB: db},
 		Products:  ProductModel{DB: db},
+		Projects:  ProjectModel{DB: db},
 	}
 }
